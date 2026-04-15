@@ -126,7 +126,7 @@ Safepulse/
 
 ### 1. Clone the repository
 ```bash
-git clone <your-repo-link>
+git clone https://github.com/pavani-n-hash/Safepulse
 cd Safepulse
 ```
 
@@ -241,10 +241,6 @@ Add these before submission:
 
 - Demo video link : <video controls src="20260415-0652-43.5187930.mp4" title="Demo video"></video>
 
-Example:
-```md
-## Demo Video
-[Watch Demo](https://your-demo-link.com)
 
 
 ---
