@@ -1,0 +1,20 @@
+{
+  "name": "safepulse",
+  "version": "1.0.0",
+  "description": "SafePulse — AI Route Safety Intelligence",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

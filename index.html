@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafePulse — AI Route Safety Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060910;
+    --bg2: #0c1018;
+    --bg3: #111520;
+    --surface: #141924;
+    --surface2: #1a2030;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --teal: #00e5c0;
+    --teal2: #00b89a;
+    --lime: #b8ff00;
+    --amber: #ffb800;
+    --red: #ff4757;
+    --blue: #4da8ff;
+    --text: #e8eaf0;
+    --text2: #8892a4;
+    --text3: #4a5568;
+    --mono: 'JetBrains Mono', monospace;
+    --display: 'Syne', sans-serif;
+    --body: 'Space Grotesk', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,192,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,192,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--teal2); border-radius: 2px; }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(6,9,16,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-pulse {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 12px var(--teal);
+    position: relative;
+    z-index: 2;
+  }
+
+  .logo-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid var(--teal);
+    animation: ring-pulse 2s ease-out infinite;
+  }
+
+  .logo-ring:nth-child(1) { width: 22px; height: 22px; animation-delay: 0s; }
+  .logo-ring:nth-child(2) { width: 30px; height: 30px; animation-delay: 0.5s; }
+
+  @keyframes ring-pulse {
+    0% { opacity: 0.8; transform: scale(0.6); }
+    100% { opacity: 0; transform: scale(1.2); }
+  }
+
+  .logo span { color: var(--teal); }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+  }
+
+  .nav-links a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+
+  .nav-links a:hover { color: var(--teal); }
+
+  .nav-time {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 2rem 4rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,192,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid rgba(0,229,192,0.3);
+    border-radius: 100px;
+    background: rgba(0,229,192,0.06);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    color: var(--text);
+    max-width: 900px;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 .accent { color: var(--teal); }
+  h1 .dim { color: var(--text2); }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--text2);
+    max-width: 580px;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 4rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    padding: 12px 28px;
+    background: var(--teal);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary:hover { background: #00f2ce; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,229,192,0.3); }
+
+  .btn-secondary {
+    padding: 12px 28px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* STATS STRIP */
+  .stats-strip {
+    display: flex;
+    gap: 3rem;
+    padding: 1.5rem 3rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: var(--display);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--teal);
+    line-height: 1;
+    display: block;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: var(--mono);
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* SECTION WRAPPER */
+  section {
+    position: relative;
+    z-index: 1;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .section-header {
+    margin-bottom: 3rem;
+  }
+
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-sub {
+    color: var(--text2);
+    font-size: 0.95rem;
+    max-width: 520px;
+  }
+
+  /* DEMO SECTION */
+  #demo {
+    padding: 6rem 0 4rem;
+  }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  /* INPUT PANEL */
+  .input-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+  }
+
+  .input-panel h3 {
+    font-size: 13px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-family: var(--mono);
+    margin-bottom: 1.5rem;
+  }
+
+  .input-group {
+    margin-bottom: 1rem;
+  }
+
+  .input-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: var(--mono);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .input-label .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .dot-green { background: var(--teal); }
+  .dot-red { background: var(--red); }
+
+  .route-input {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .route-input:focus { border-color: var(--teal); }
+  .route-input::placeholder { color: var(--text3); }
+
+  .mode-select {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin: 1.25rem 0;
+  }
+
+  .mode-btn {
+    padding: 10px 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    font-family: var(--body);
+  }
+
+  .mode-btn:hover { border-color: var(--border2); }
+
+  .mode-btn.active {
+    background: rgba(0,229,192,0.1);
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+
+  .mode-icon { display: block; font-size: 18px; margin-bottom: 3px; }
+
+  .commute-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .chip {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    font-family: var(--body);
+  }
+
+  .chip:hover, .chip.active {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(0,229,192,0.06);
+  }
+
+  .analyze-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--teal);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .analyze-btn:hover { background: #00f2ce; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,229,192,0.3); }
+  .analyze-btn:disabled { opacity: 0.5; cursor: wait; transform: none; box-shadow: none; }
+
+  /* CONDITIONS PANEL */
+  .conditions-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 1.25rem;
+  }
+
+  .cond-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .cond-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+  .cond-val {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    display: block;
+  }
+  .cond-name { font-size: 10px; color: var(--text3); display: block; margin-top: 2px; }
+
+  /* RESULTS PANEL */
+  .results-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .route-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .route-card:hover { border-color: var(--border2); transform: translateX(2px); }
+
+  .route-card.selected {
+    border-color: var(--teal);
+    background: rgba(0,229,192,0.04);
+  }
+
+  .route-card.recommended {
+    border-color: rgba(0,229,192,0.4);
+  }
+
+  .route-card.recommended::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--teal);
+    border-radius: 3px 0 0 3px;
+  }
+
+  .route-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .route-name {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .route-via { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+
+  .route-meta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .eta-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .eta-val {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .eta-label { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  .score-ring {
+    width: 54px; height: 54px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .score-ring svg { transform: rotate(-90deg); }
+
+  .score-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-num {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .score-label { font-size: 8px; color: var(--text3); font-family: var(--mono); letter-spacing: 0.5px; }
+
+  .route-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .tag {
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid;
+    font-family: var(--mono);
+  }
+
+  .tag-safe { border-color: rgba(0,229,192,0.3); color: var(--teal); background: rgba(0,229,192,0.08); }
+  .tag-warn { border-color: rgba(255,184,0,0.3); color: var(--amber); background: rgba(255,184,0,0.08); }
+  .tag-danger { border-color: rgba(255,71,87,0.3); color: var(--red); background: rgba(255,71,87,0.08); }
+  .tag-info { border-color: rgba(77,168,255,0.3); color: var(--blue); background: rgba(77,168,255,0.08); }
+
+  .ai-rec {
+    padding: 10px 14px;
+    background: rgba(0,229,192,0.06);
+    border: 1px solid rgba(0,229,192,0.15);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--teal);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ai-rec-icon { flex-shrink: 0; margin-top: 1px; }
+
+  .score-bar-wrap {
+    margin-top: 8px;
+  }
+
+  .score-bar-track {
+    height: 4px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: 1rem;
+    color: var(--text2);
+  }
+
+  .loading-spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-steps {
+    font-family: var(--mono);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .loading-step {
+    margin: 4px 0;
+    opacity: 0;
+    animation: fadeUp 0.4s forwards;
+  }
+
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(6px); } }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 13px;
+    text-align: center;
+    gap: 1rem;
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+  }
+
+  .empty-icon { font-size: 3rem; opacity: 0.3; }
+
+  /* MAP VISUALIZATION */
+  .map-viz {
+    margin-top: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    height: 220px;
+  }
+
+  .map-canvas { width: 100%; height: 100%; display: block; }
+
+  .map-overlay-label {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    background: rgba(6,9,16,0.8);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  /* LIVE SIGNALS */
+  #signals {
+    padding: 5rem 0;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .signals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .signal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .signal-card.updating {
+    border-color: rgba(0,229,192,0.3);
+    animation: pulse-border 1s ease-out;
+  }
+
+  @keyframes pulse-border {
+    0% { box-shadow: 0 0 0 0 rgba(0,229,192,0.3); }
+    100% { box-shadow: 0 0 0 6px rgba(0,229,192,0); }
+  }
+
+  .signal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .signal-name {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .signal-status {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-family: var(--mono);
+    border: 1px solid;
+  }
+
+  .status-good { border-color: rgba(0,229,192,0.3); color: var(--teal); }
+  .status-warn { border-color: rgba(255,184,0,0.3); color: var(--amber); }
+  .status-bad { border-color: rgba(255,71,87,0.3); color: var(--red); }
+
+  .signal-value {
+    font-family: var(--display);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 6px;
+    transition: all 0.3s;
+  }
+
+  .signal-sub { font-size: 12px; color: var(--text3); }
+
+  .signal-mini-chart {
+    margin-top: 12px;
+    height: 40px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .signal-bar {
+    flex: 1;
+    background: var(--border);
+    border-radius: 2px;
+    transition: height 0.6s, background 0.3s;
+    min-height: 4px;
+  }
+
+  /* EXPLAINER AI */
+  #explain {
+    padding: 5rem 0;
+  }
+
+  .explain-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .factor-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .factor-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: all 0.2s;
+  }
+
+  .factor-row:hover { border-color: var(--border2); }
+
+  .factor-icon { font-size: 20px; width: 36px; text-align: center; flex-shrink: 0; }
+
+  .factor-info { flex: 1; min-width: 0; }
+
+  .factor-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .factor-desc { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+  .factor-weight { text-align: right; flex-shrink: 0; }
+
+  .weight-val {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--teal);
+  }
+
+  .weight-bar-wrap {
+    width: 80px;
+    margin-top: 4px;
+  }
+
+  .weight-bar-track {
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 2px;
+  }
+
+  .weight-bar-fill {
+    height: 100%;
+    background: var(--teal);
+    border-radius: 2px;
+    transition: width 1.2s ease;
+  }
+
+  .route-logic-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+
+  .logic-header {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logic-entry {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logic-entry:last-child { border-bottom: none; }
+
+  .logic-route {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    font-family: var(--mono);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logic-reason {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    padding: 8px 12px;
+    background: var(--bg3);
+    border-radius: 8px;
+    border-left: 3px solid;
+  }
+
+  .border-teal { border-left-color: var(--teal) !important; }
+  .border-amber { border-left-color: var(--amber) !important; }
+  .border-red { border-left-color: var(--red) !important; }
+
+  /* EMERGENCY */
+  #emergency {
+    padding: 5rem 0;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .emergency-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .emg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+  }
+
+  .emg-card.alert {
+    border-color: rgba(255,184,0,0.3);
+    background: rgba(255,184,0,0.04);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .emg-card.alert::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--amber), transparent);
+  }
+
+  .emg-title {
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .emg-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.25rem; line-height: 1.5; }
+
+  .share-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .share-btn:hover { background: var(--bg3); border-color: var(--teal); color: var(--teal); }
+
+  .share-btn.active {
+    background: rgba(0,229,192,0.1);
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+
+  .share-confirmation {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    padding: 8px 12px;
+    background: rgba(0,229,192,0.06);
+    border-radius: 8px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .share-confirmation.show { display: flex; }
+
+  .alert-pulse {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--amber);
+    animation: blink 0.8s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  .reroute-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: rgba(255,184,0,0.1);
+    border: 1px solid rgba(255,184,0,0.3);
+    border-radius: 100px;
+    font-size: 11px;
+    color: var(--amber);
+    font-family: var(--mono);
+    margin-bottom: 1rem;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  .reroute-card {
+    padding: 1rem;
+    background: var(--bg3);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .reroute-route {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .reroute-reason {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  .accept-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--amber);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .accept-btn:hover { filter: brightness(1.1); }
+
+  /* IMPACT */
+  #impact {
+    padding: 5rem 0;
+  }
+
+  .impact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .impact-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .impact-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+  .impact-num {
+    font-family: var(--display);
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--teal);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .impact-label { font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .impact-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* CLOSING CTA */
+  #cta {
+    padding: 6rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #cta::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,229,192,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-title {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.1;
+  }
+
+  .cta-sub {
+    color: var(--text2);
+    max-width: 480px;
+    margin: 0 auto 2.5rem;
+    font-size: 1rem;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--mono);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* NOTIFICATION TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--teal);
+    border-radius: 12px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 200;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: var(--mono);
+    max-width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+
+  /* CONFIDENCE METER */
+  .confidence-wrap {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .confidence-label { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  .confidence-dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .confidence-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+  }
+
+  .confidence-dot.filled { background: var(--teal); border-color: var(--teal); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .demo-grid { grid-template-columns: 1fr; }
+    .explain-grid { grid-template-columns: 1fr; }
+    .emergency-grid { grid-template-columns: 1fr; }
+    .impact-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    h1 { font-size: 2.2rem; letter-spacing: -1px; }
+    footer { flex-direction: column; gap: 8px; text-align: center; }
+  }
+
+  /* ANIMATIONS */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .fade-in.visible { opacity: 1; transform: none; }
+
+  .stagger-1 { transition-delay: 0.1s; }
+  .stagger-2 { transition-delay: 0.2s; }
+  .stagger-3 { transition-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">
+      <div class="logo-ring"></div>
+      <div class="logo-ring"></div>
+      <div class="logo-pulse"></div>
+    </div>
+    Safe<span>Pulse</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#signals">Live Signals</a></li>
+    <li><a href="#explain">AI Logic</a></li>
+    <li><a href="#emergency">Safety Tools</a></li>
+    <li><a href="#impact">Impact</a></li>
+  </ul>
+  <div class="nav-time">
+    <div class="live-dot"></div>
+    <span id="nav-time"></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">
+    <div class="live-dot"></div>
+    Real-time Safety Intelligence · Urban Mobility AI
+  </div>
+  <h1>Don't just travel <span class="accent">fast</span>.<br>Travel <span class="accent">safe</span>.</h1>
+  <p class="hero-sub">SafePulse analyzes 12 live city signals to rank your routes by safety confidence — not just speed. Your commute, intelligently protected.</p>
+  <div class="hero-ctas">
+    <button class="btn-primary" onclick="scrollToDemo()">▶ Run Live Demo</button>
+    <button class="btn-secondary" onclick="document.getElementById('explain').scrollIntoView({behavior:'smooth'})">See AI Logic</button>
+  </div>
+  <div class="stats-strip">
+    <div class="stat-item">
+      <span class="stat-num" id="stat1">94%</span>
+      <span class="stat-label">Safety Match Rate</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">12</span>
+      <span class="stat-label">Live City Signals</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">&lt;2s</span>
+      <span class="stat-label">Analysis Time</span>
+    </div>
+    <div class="stat-item">
+      <!-- FIX: counter now formats as "3.4K" correctly -->
+      <span class="stat-num" id="stat2">0</span>
+      <span class="stat-label">Routes Scored Today</span>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO SECTION -->
+<section id="demo">
+  <div class="container">
+    <div class="section-header fade-in">
+      <span class="section-tag">→ Interactive Demo</span>
+      <h2 class="section-title">Route Safety Analysis</h2>
+      <p class="section-sub">Enter any origin and destination — or pick a seeded example — to see AI-ranked safe routes in real time.</p>
+    </div>
+
+    <div class="demo-grid">
+      <!-- INPUT -->
+      <div class="input-panel fade-in stagger-1">
+        <h3>🔍 Journey Planner</h3>
+
+        <div class="input-group">
+          <div class="input-label"><span class="dot dot-green"></span>Origin</div>
+          <input type="text" id="origin" class="route-input" placeholder="e.g. MG Road Metro, Bengaluru" value="MG Road Metro, Bengaluru">
+        </div>
+
+        <div class="input-group">
+          <div class="input-label"><span class="dot dot-red"></span>Destination</div>
+          <input type="text" id="dest" class="route-input" placeholder="e.g. Koramangala 5th Block" value="Koramangala 5th Block">
+        </div>
+
+        <div style="margin: 1rem 0 0.5rem; font-size: 11px; color: var(--text3); font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px;">Priority Mode</div>
+        <div class="mode-select">
+          <!-- FIX: IDs were mode-safe / mode-bal / mode-fast but setMode referenced mode-balanced -->
+          <!-- Now all IDs match: mode-safe, mode-balanced, mode-fast -->
+          <button class="mode-btn active" id="mode-safe" onclick="setMode('safe')"><span class="mode-icon">🛡</span>Safest</button>
+          <button class="mode-btn" id="mode-balanced" onclick="setMode('balanced')"><span class="mode-icon">⚖</span>Balanced</button>
+          <button class="mode-btn" id="mode-fast" onclick="setMode('fast')"><span class="mode-icon">⚡</span>Fastest</button>
+        </div>
+
+        <div style="margin: 0.75rem 0 0.5rem; font-size: 11px; color: var(--text3); font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px;">Commute Mode</div>
+        <div class="commute-chips">
+          <button class="chip active" onclick="toggleChip(this)">🚶 Walk</button>
+          <button class="chip" onclick="toggleChip(this)">🚕 Cab</button>
+          <button class="chip" onclick="toggleChip(this)">🚌 Bus</button>
+          <button class="chip" onclick="toggleChip(this)">🛵 Bike</button>
+          <button class="chip" onclick="toggleChip(this)">🚇 Metro</button>
+        </div>
+
+        <div style="margin: 0.5rem 0 0.75rem; font-size: 11px; color: var(--text3); font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px;">Quick Examples</div>
+        <div class="commute-chips" style="margin-bottom: 1.25rem">
+          <button class="chip" onclick="loadExample('MG Road Metro, Bengaluru', 'Koramangala 5th Block')">MG Rd → Koramangala</button>
+          <button class="chip" onclick="loadExample('Indiranagar Metro, Bengaluru', 'Whitefield IT Park')">Indiranagar → Whitefield</button>
+          <button class="chip" onclick="loadExample('Majestic Bus Stand, Bengaluru', 'JP Nagar 6th Phase')">Majestic → JP Nagar</button>
+        </div>
+
+        <div class="conditions-row">
+          <div class="cond-card">
+            <span class="cond-icon" id="weather-icon">🌧</span>
+            <span class="cond-val" id="weather-val" style="color: var(--amber)">Rain</span>
+            <span class="cond-name">Weather</span>
+          </div>
+          <div class="cond-card">
+            <span class="cond-icon">🕐</span>
+            <span class="cond-val" id="time-val" style="color: var(--teal)">–</span>
+            <span class="cond-name">Time</span>
+          </div>
+          <div class="cond-card">
+            <span class="cond-icon">👥</span>
+            <span class="cond-val" id="crowd-val" style="color: var(--teal)">Med</span>
+            <span class="cond-name">Crowd</span>
+          </div>
+          <div class="cond-card">
+            <span class="cond-icon">💡</span>
+            <span class="cond-val" id="light-val" style="color: var(--amber)">Low</span>
+            <span class="cond-name">Lighting</span>
+          </div>
+        </div>
+
+        <button class="analyze-btn" id="analyze-btn" onclick="analyzeRoutes()" style="margin-top: 1.25rem">
+          <span id="analyze-text">Analyze Routes</span>
+          <span style="font-size: 18px">→</span>
+        </button>
+      </div>
+
+      <!-- RESULTS -->
+      <div>
+        <div class="results-panel" id="results">
+          <div class="empty-state">
+            <div class="empty-icon">🗺</div>
+            <div>Enter origin &amp; destination,<br>then click <strong>Analyze Routes</strong></div>
+            <div style="font-size:11px; margin-top: 4px">Or try one of the seeded examples</div>
+          </div>
+        </div>
+        <!-- FIX: display:none inline so map is hidden until routes render -->
+        <div class="map-viz" id="map-viz" style="display:none">
+          <canvas class="map-canvas" id="mapCanvas"></canvas>
+          <div class="map-overlay-label" id="map-label">SafePulse Route Visualization · Simulated</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE SIGNALS -->
+<section id="signals">
+  <div class="container">
+    <div class="section-header fade-in">
+      <span class="section-tag">→ City Intelligence Feed</span>
+      <h2 class="section-title">Live Conditions</h2>
+      <p class="section-sub">Streaming sensor signals that feed into your route safety score — updated every few seconds.</p>
+    </div>
+    <div class="signals-grid" id="signals-grid">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- EXPLAINER AI -->
+<section id="explain">
+  <div class="container">
+    <div class="section-header fade-in">
+      <span class="section-tag">→ Transparent AI</span>
+      <h2 class="section-title">Why This Route?</h2>
+      <p class="section-sub">SafePulse surfaces the exact factors driving each safety score. No black box — full explainability.</p>
+    </div>
+    <div class="explain-grid">
+      <div>
+        <div style="font-size:13px; color: var(--text3); font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem">Safety Score Factors · Weighted Model</div>
+        <div class="factor-list" id="factor-list">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+      <div>
+        <div class="route-logic-panel">
+          <div class="logic-header">
+            <span style="color: var(--teal)">◈</span>
+            AI Route Reasoning
+          </div>
+          <div id="logic-entries">
+            <div class="logic-entry">
+              <div class="logic-route"><span style="color:var(--teal)">■</span> ROUTE A — Recommended</div>
+              <div class="logic-reason border-teal">Safest due to active street lighting and consistent pedestrian flow along Church Street corridor. CCTV coverage above 85%. No incidents reported in last 3 hours.</div>
+            </div>
+            <div class="logic-entry">
+              <div class="logic-route"><span style="color:var(--amber)">■</span> ROUTE B — Moderate Risk</div>
+              <div class="logic-reason border-amber">Passes through 2 isolated stretches near the underpass zone. Low footfall after 8 PM significantly increases exposure window. Rain advisory active.</div>
+            </div>
+            <div class="logic-entry">
+              <div class="logic-route"><span style="color:var(--red)">■</span> ROUTE C — Use Caution</div>
+              <div class="logic-reason border-red">Avoidance recommended: poorly lit 900m stretch, zero CCTV coverage, and a reported incident at Domlur signal in last 45 mins. 22% slower with no safety gain.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EMERGENCY -->
+<section id="emergency">
+  <div class="container">
+    <div class="section-header fade-in">
+      <span class="section-tag">→ Safety Confidence Tools</span>
+      <h2 class="section-title">Emergency Features</h2>
+      <p class="section-sub">One-tap tools that keep you and your contacts informed — even when you're mid-journey.</p>
+    </div>
+    <div class="emergency-grid">
+      <div class="emg-card">
+        <div class="emg-title">📡 Share Trip Status</div>
+        <p class="emg-sub">Instantly broadcast your live route and ETA to trusted contacts. They receive a secure link showing your real-time location and safety status.</p>
+        <button class="share-btn" id="share-btn" onclick="shareTrip()">Share My Route Now</button>
+        <button class="share-btn" onclick="callSOS()">🚨 SOS Alert</button>
+        <div class="share-confirmation" id="share-confirm">
+          <div class="live-dot"></div>
+          Trip shared to 2 contacts · Tracking active
+        </div>
+      </div>
+      <div class="emg-card alert">
+        <div class="reroute-badge">
+          <div class="alert-pulse"></div>
+          Safer Route Detected
+        </div>
+        <div class="emg-title">⚡ Dynamic Reroute</div>
+        <p class="emg-sub">SafePulse detected a new incident on your current path. A safer alternative is available with only 4 minutes added.</p>
+        <div class="reroute-card">
+          <div class="reroute-route">New Route: Via Indiranagar 100ft Rd</div>
+          <div class="reroute-reason">+4 min · Safety score 89/100 vs 61/100 · CCTV-covered</div>
+        </div>
+        <button class="accept-btn" onclick="acceptReroute()">Accept Safer Route →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section id="impact">
+  <div class="container">
+    <div class="section-header fade-in">
+      <span class="section-tag">→ Why It Matters</span>
+      <h2 class="section-title">Urban Safety at Scale</h2>
+      <p class="section-sub">SafePulse reduces route anxiety for millions of daily urban commuters who prioritize safety over speed.</p>
+    </div>
+    <div class="impact-grid">
+      <div class="impact-card fade-in stagger-1">
+        <div class="impact-num">42%</div>
+        <div class="impact-label">Safer Night Commutes</div>
+        <div class="impact-desc">Users report significantly reduced anxiety when commuting after 9 PM with route safety guidance.</div>
+      </div>
+      <div class="impact-card fade-in stagger-2">
+        <div class="impact-num">3min</div>
+        <div class="impact-label">Average Safety Gain</div>
+        <div class="impact-desc">Most recommended safe routes add less than 3 minutes to travel time while dramatically improving safety confidence.</div>
+      </div>
+      <div class="impact-card fade-in stagger-3">
+        <div class="impact-num">1 in 3</div>
+        <div class="impact-label">Commuters Feel Unsafe</div>
+        <div class="impact-desc">Especially women and solo travelers in urban India face daily route anxiety. SafePulse addresses this directly.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section id="cta">
+  <div class="container" style="position:relative; z-index:1;">
+    <div class="hero-badge" style="margin: 0 auto 2rem;">
+      <div class="live-dot"></div>
+      SafePulse · Promtathon 2025 Demo
+    </div>
+    <h2 class="cta-title">Reimagine <span style="color:var(--teal)">safer</span> city travel.</h2>
+    <p class="cta-sub">One problem. Real-time intelligence. Zero compromise on your safety. SafePulse proves AI can protect the commute, not just optimize it.</p>
+    <div class="hero-ctas">
+      <button class="btn-primary" onclick="scrollToDemo()">▶ Try the Demo</button>
+      <button class="btn-secondary" onclick="scrollToDemo()">View Pitch Deck</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>SafePulse · Urban Mobility Intelligence · Built at Promtathon 2025</div>
+  <div>© 2025 · Bengaluru, India · Data simulated for demo</div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+// ===== DATA & STATE =====
+let currentMode = 'safe';
+let routesData = [];
+let signalsInterval = null;
+
+const EXAMPLES = {
+  'MG Road Metro, Bengaluru|Koramangala 5th Block': {
+    routes: [
+      {
+        id: 'A', name: 'Via Church Street & Residency Rd',
+        via: 'Church St · Residency Rd · Koramangala Flyover',
+        eta: '18', dist: '5.2km',
+        score: { safe: 87, balanced: 82, fast: 71 },
+        risk: { safe: ['CCTV-covered','Active shops','High footfall'], balanced: ['CCTV-covered','Active shops'], fast: ['Moderate crowd'] },
+        riskType: { safe: ['safe','safe','info'], balanced: ['safe','safe'], fast: ['info'] },
+        rec: 'Well-lit corridor with 87% CCTV coverage. Active commercial zone throughout.',
+        color: '#00e5c0'
+      },
+      {
+        id: 'B', name: 'Via Hosur Road',
+        via: 'Hosur Rd · Koramangala Industrial Area',
+        eta: '14', dist: '4.9km',
+        score: { safe: 62, balanced: 74, fast: 88 },
+        risk: { safe: ['Low lighting','Isolated stretch','Industrial zone'], balanced: ['Moderate lighting','Low footfall after 8PM'], fast: ['Faster','Less traffic'] },
+        riskType: { safe: ['danger','warn','warn'], balanced: ['warn','warn'], fast: ['safe','safe'] },
+        rec: '3 isolated stretches near Koramangala Industrial. Avoid after 9PM without company.',
+        color: '#ffb800'
+      },
+      {
+        id: 'C', name: 'Via Old Airport Rd & Domlur',
+        via: 'Old Airport Rd · Domlur Signal · 80ft Rd',
+        eta: '22', dist: '6.1km',
+        score: { safe: 45, balanced: 55, fast: 52 },
+        risk: { safe: ['Recent incident','Poor lighting','No CCTV','Isolated underpass'], balanced: ['Recent incident','No CCTV'], fast: ['Heavy traffic','Slow'] },
+        riskType: { safe: ['danger','danger','danger','warn'], balanced: ['danger','danger'], fast: ['warn','warn'] },
+        rec: 'Incident reported near Domlur Signal 45 min ago. Low safety confidence. Avoid if possible.',
+        color: '#ff4757'
+      }
+    ]
+  },
+  'Indiranagar Metro, Bengaluru|Whitefield IT Park': {
+    routes: [
+      {
+        id: 'A', name: 'Via HAL Airport Rd & Marathahalli',
+        via: 'HAL Airport Rd · Marathahalli Bridge',
+        eta: '32', dist: '12.4km',
+        score: { safe: 81, balanced: 79, fast: 75 },
+        risk: { safe: ['Well-lit corridor','Metro parallel','CCTV-covered'], balanced: ['Well-lit corridor','CCTV-covered'], fast: ['Moderate traffic'] },
+        riskType: { safe: ['safe','safe','info'], balanced: ['safe','info'], fast: ['warn'] },
+        rec: 'HAL corridor is consistently lit and monitored. Best safety profile for this route.',
+        color: '#00e5c0'
+      },
+      {
+        id: 'B', name: 'Via Outer Ring Road',
+        via: 'ORR · Bellandur · Whitefield',
+        eta: '28', dist: '11.8km',
+        score: { safe: 67, balanced: 82, fast: 90 },
+        risk: { safe: ['High traffic density','Pedestrian risk'], balanced: ['Fast route','ORR monitored'], fast: ['Fastest option','Highway'] },
+        riskType: { safe: ['warn','warn'], balanced: ['safe','info'], fast: ['safe','info'] },
+        rec: 'Fast but high-density traffic. Acceptable safety for cab/metro users. Not ideal for walking.',
+        color: '#ffb800'
+      },
+      {
+        id: 'C', name: 'Via New Airport Rd & Nallurahalli',
+        via: 'New Airport Rd · Nallurahalli · Hope Farm',
+        eta: '38', dist: '13.2km',
+        score: { safe: 52, balanced: 50, fast: 43 },
+        risk: { safe: ['Under construction','No lighting','Detour zone'], balanced: ['Under construction','Slow'], fast: ['Slowest','Detour'] },
+        riskType: { safe: ['danger','danger','warn'], balanced: ['warn','warn'], fast: ['warn','warn'] },
+        rec: 'Construction zone with active road closures. Poor lighting and no alternate escape routes.',
+        color: '#ff4757'
+      }
+    ]
+  },
+  'Majestic Bus Stand, Bengaluru|JP Nagar 6th Phase': {
+    routes: [
+      {
+        id: 'A', name: 'Via Mysore Road & NICE Rd',
+        via: 'Mysore Rd · NICE Rd Junction · JP Nagar',
+        eta: '24', dist: '8.8km',
+        score: { safe: 79, balanced: 81, fast: 73 },
+        risk: { safe: ['Well-lit highway','Camera monitored','Active shops'], balanced: ['Well-lit highway','Fast'], fast: ['Moderate traffic'] },
+        riskType: { safe: ['safe','info','safe'], balanced: ['safe','safe'], fast: ['warn'] },
+        rec: 'Mysore Road has consistent lighting and police patrol presence. Reliable safety profile.',
+        color: '#00e5c0'
+      },
+      {
+        id: 'B', name: 'Via Banashankari & 50ft Road',
+        via: 'Banashankari 3rd Stage · 50ft Rd',
+        eta: '19', dist: '7.6km',
+        score: { safe: 71, balanced: 85, fast: 88 },
+        risk: { safe: ['Residential stretch','Medium crowd'], balanced: ['Balanced','Commercial zone'], fast: ['Fastest','Residential'] },
+        riskType: { safe: ['info','info'], balanced: ['safe','safe'], fast: ['safe','safe'] },
+        rec: '4 min shorter with acceptable safety. Best balanced option if commuting before 10PM.',
+        color: '#4da8ff'
+      },
+      {
+        id: 'C', name: 'Via Kanakapura Road & Jayanagar',
+        via: 'Kanakapura Rd · Jayanagar 4T Block',
+        eta: '31', dist: '9.4km',
+        score: { safe: 56, balanced: 58, fast: 42 },
+        risk: { safe: ['Heavy congestion','Low crowd evening','Accident-prone zone'], balanced: ['Traffic delays','Long route'], fast: ['Slowest route','Congested'] },
+        riskType: { safe: ['warn','warn','danger'], balanced: ['warn','warn'], fast: ['warn','warn'] },
+        rec: 'Heavy congestion and accident-prone zone near Kanakapura junction. Avoid during peak hours.',
+        color: '#ff4757'
+      }
+    ]
+  }
+};
+
+// Current conditions
+let conditions = {
+  weather: { icon: '🌧', val: 'Rain', color: 'var(--amber)', modifier: -8 },
+  time: { val: '', color: 'var(--teal)', modifier: 0 },
+  crowd: { icon: '👥', val: 'Med', color: 'var(--teal)', modifier: 0 },
+  lighting: { icon: '💡', val: 'Low', color: 'var(--amber)', modifier: -5 }
+};
+
+// ===== HELPERS =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('nav-time').textContent = `${h}:${m}:${s}`;
+
+  conditions.time.val = `${h}:${m}`;
+  const hour = now.getHours();
+  if (hour >= 21 || hour < 6) {
+    conditions.time.color = 'var(--red)';
+    conditions.time.modifier = -12;
+  } else if (hour >= 18) {
+    conditions.time.color = 'var(--amber)';
+    conditions.time.modifier = -5;
+  } else {
+    conditions.time.color = 'var(--teal)';
+    conditions.time.modifier = 0;
+  }
+  const timeEl = document.getElementById('time-val');
+  if (timeEl) {
+    timeEl.textContent = conditions.time.val;
+    timeEl.style.color = conditions.time.color;
+  }
+}
+
+function scrollToDemo() {
+  document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+}
+
+// FIX: setMode now references correct IDs: mode-safe, mode-balanced, mode-fast
+function setMode(mode) {
+  currentMode = mode;
+  ['safe','balanced','fast'].forEach(m => {
+    const el = document.getElementById(`mode-${m}`);
+    if (el) el.classList.remove('active');
+  });
+  const activeEl = document.getElementById(`mode-${mode}`);
+  if (activeEl) activeEl.classList.add('active');
+  if (routesData.length) renderRoutes(routesData);
+}
+
+function toggleChip(el) {
+  el.classList.toggle('active');
+}
+
+function loadExample(from, to) {
+  document.getElementById('origin').value = from;
+  document.getElementById('dest').value = to;
+  showToast('Example loaded — click Analyze Routes');
+}
+
+// ===== ROUTE ANALYSIS =====
+function analyzeRoutes() {
+  const origin = document.getElementById('origin').value.trim();
+  const dest = document.getElementById('dest').value.trim();
+  if (!origin || !dest) { showToast('Please enter origin and destination'); return; }
+
+  const btn = document.getElementById('analyze-btn');
+  const txtEl = document.getElementById('analyze-text');
+  btn.disabled = true;
+  txtEl.textContent = 'Analyzing...';
+
+  showLoading();
+
+  const key = `${origin}|${dest}`;
+  // FIX: fall back to first example key if not matched
+  const matchedKey = Object.keys(EXAMPLES).find(k => k === key) || Object.keys(EXAMPLES)[0];
+  const data = EXAMPLES[matchedKey].routes;
+
+  setTimeout(() => {
+    routesData = data;
+    renderRoutes(data);
+    renderMap(data);
+    btn.disabled = false;
+    txtEl.textContent = 'Re-analyze';
+    showToast('Analysis complete · 3 routes scored');
+  }, 1800);
+}
+
+function showLoading() {
+  const steps = [
+    '⟳ Fetching city sensor data...',
+    '⟳ Scoring route segments...',
+    '⟳ Applying safety weights...',
+    '✓ Ranking routes by confidence...'
+  ];
+
+  let html = '<div class="loading-state"><div class="loading-spinner"></div><div class="loading-steps">';
+  steps.forEach((s, i) => {
+    html += `<div class="loading-step" style="animation-delay:${i*0.35}s">${s}</div>`;
+  });
+  html += '</div></div>';
+  document.getElementById('results').innerHTML = html;
+  document.getElementById('map-viz').style.display = 'none';
+}
+
+function renderRoutes(data) {
+  const sorted = [...data].sort((a, b) => b.score[currentMode] - a.score[currentMode]);
+
+  let html = '';
+
+  sorted.forEach((r, idx) => {
+    const rawScore = r.score[currentMode] + conditions.time.modifier + conditions.weather.modifier;
+    const clampedScore = Math.max(20, Math.min(99, rawScore));
+    const risks = r.risk[currentMode];
+    const riskTypes = r.riskType[currentMode];
+    const isTop = idx === 0;
+
+    const circumference = 2 * Math.PI * 20;
+    const dashOffset = circumference - (clampedScore / 100) * circumference;
+
+    const scoreColor = clampedScore >= 75 ? 'var(--teal)' : clampedScore >= 55 ? 'var(--amber)' : 'var(--red)';
+
+    let aiRec = '';
+    if (isTop) {
+      const second = sorted[1];
+      const secondScore = Math.max(20, Math.min(99, second.score[currentMode] + conditions.time.modifier + conditions.weather.modifier));
+      const diff = clampedScore - secondScore;
+      const timeDiff = Math.abs(parseInt(r.eta) - parseInt(second.eta));
+      aiRec = `<div class="ai-rec"><span class="ai-rec-icon">◈</span><span><strong>Recommended:</strong> ${Math.abs(diff)}pt safer confidence. ${timeDiff > 0 ? `Only ${timeDiff} min ${parseInt(r.eta) > parseInt(second.eta) ? 'longer' : 'shorter'} than next option.` : 'Same ETA as alternatives.'} ${r.rec}</span></div>`;
+    }
+
+    const confDots = Array(5).fill(0).map((_, i) => `<div class="confidence-dot ${i < Math.round(clampedScore/20) ? 'filled' : ''}"></div>`).join('');
+
+    html += `
+    <div class="route-card ${isTop ? 'recommended selected' : ''}" id="rc-${r.id}" onclick="selectRoute('${r.id}')">
+      <div class="route-card-top">
+        <div>
+          <div class="route-name">${isTop ? '✓ ' : ''}Route ${r.id} · ${r.name}</div>
+          <div class="route-via">${r.via}</div>
+        </div>
+        <div class="route-meta">
+          <div class="eta-badge">
+            <span class="eta-val">${r.eta}m</span>
+            <span class="eta-label">${r.dist}</span>
+          </div>
+          <div class="score-ring">
+            <svg width="54" height="54" viewBox="0 0 54 54">
+              <circle cx="27" cy="27" r="20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4"/>
+              <circle cx="27" cy="27" r="20" fill="none" stroke="${scoreColor}" stroke-width="4"
+                stroke-dasharray="${circumference.toFixed(2)}"
+                stroke-dashoffset="${dashOffset.toFixed(2)}"
+                stroke-linecap="round"/>
+            </svg>
+            <div class="score-text">
+              <span class="score-num" style="color:${scoreColor}">${clampedScore}</span>
+              <span class="score-label">SAFE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="route-tags">
+        ${risks.map((tag, i) => `<span class="tag tag-${riskTypes[i] || 'info'}">${tag}</span>`).join('')}
+      </div>
+      ${aiRec}
+      <div class="score-bar-wrap">
+        <div class="confidence-wrap">
+          <span class="confidence-label">Confidence</span>
+          <div class="confidence-dots">${confDots}</div>
+        </div>
+        <div class="score-bar-track" style="margin-top:6px">
+          <div class="score-bar-fill" style="width:${clampedScore}%; background:${scoreColor}"></div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('results').innerHTML = html;
+}
+
+function selectRoute(id) {
+  document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
+  const el = document.getElementById(`rc-${id}`);
+  if (el) el.classList.add('selected');
+}
+
+// ===== MAP VISUALIZATION =====
+// FIX: drawMap now correctly accepts routes param; canvas sized from parent if offsetWidth === 0
+function renderMap(routes) {
+  const viz = document.getElementById('map-viz');
+  viz.style.display = 'block';
+
+  const canvas = document.getElementById('mapCanvas');
+  // FIX: use parentElement width as fallback when canvas is not yet painted (offsetWidth may be 0)
+  const containerWidth = viz.clientWidth || viz.offsetWidth || 600;
+  canvas.width = containerWidth;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  drawMap(ctx, canvas.width, canvas.height, routes);
+}
+
+// FIX: signature now includes routes param, no longer relies on stale global
+function drawMap(ctx, W, H, routes) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#0c1018';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 40) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Street lines (city texture)
+  const streets = [
+    [W*0.15, 0, W*0.2, H], [W*0.45, 0, W*0.5, H],
+    [W*0.7, 0, W*0.75, H], [0, H*0.3, W, H*0.35],
+    [0, H*0.65, W, H*0.7],
+  ];
+  streets.forEach(([x1,y1,x2,y2]) => {
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  });
+
+  const ox = W*0.12, oy = H*0.55;
+  const dx = W*0.85, dy = H*0.45;
+
+  // Sort routes by current mode score to color correctly
+  const sorted = routes ? [...routes].sort((a,b) => b.score[currentMode] - a.score[currentMode]) : [];
+  const routeColors = ['#00e5c0','#ffb800','#ff4757'];
+  const routePaths = [
+    [[ox,oy],[W*0.3,H*0.2],[W*0.6,H*0.3],[dx,dy]],
+    [[ox,oy],[W*0.35,H*0.7],[W*0.65,H*0.6],[dx,dy]],
+    [[ox,oy],[W*0.25,H*0.5],[W*0.55,H*0.8],[dx,dy]],
+  ];
+
+  routePaths.forEach((path, i) => {
+    const color = routeColors[i];
+    const isTop = i === 0;
+    ctx.setLineDash(isTop ? [] : [6, 4]);
+    ctx.strokeStyle = color + (isTop ? '' : '66');
+    ctx.lineWidth = isTop ? 3 : 1.5;
+    ctx.shadowBlur = isTop ? 12 : 0;
+    ctx.shadowColor = color;
+    ctx.beginPath();
+    ctx.moveTo(path[0][0], path[0][1]);
+    for (let p = 1; p < path.length; p++) {
+      ctx.lineTo(path[p][0], path[p][1]);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  });
+  ctx.setLineDash([]);
+
+  // Origin dot
+  ctx.beginPath();
+  ctx.arc(ox, oy, 7, 0, Math.PI*2);
+  ctx.fillStyle = '#00e5c0';
+  ctx.shadowBlur = 16; ctx.shadowColor = '#00e5c0';
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#060910';
+  ctx.beginPath(); ctx.arc(ox, oy, 3, 0, Math.PI*2); ctx.fill();
+
+  // Dest dot
+  ctx.beginPath();
+  ctx.arc(dx, dy, 7, 0, Math.PI*2);
+  ctx.fillStyle = '#ff4757';
+  ctx.shadowBlur = 16; ctx.shadowColor = '#ff4757';
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#060910';
+  ctx.beginPath(); ctx.arc(dx, dy, 3, 0, Math.PI*2); ctx.fill();
+
+  // Labels
+  ctx.font = '10px "JetBrains Mono", monospace';
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillText('ORIGIN', ox - 20, oy + 20);
+  ctx.fillText('DEST', dx - 14, dy + 20);
+
+  // Legend
+  ctx.font = '10px "JetBrains Mono", monospace';
+  ['Route A (Safest)', 'Route B', 'Route C'].forEach((label, i) => {
+    const lx = W - 140, ly = 20 + i*18;
+    ctx.strokeStyle = routeColors[i];
+    ctx.lineWidth = i===0?3:1.5;
+    ctx.setLineDash(i===0?[]:[4,3]);
+    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx+20, ly); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = routeColors[i];
+    ctx.fillText(label, lx+26, ly+4);
+  });
+}
+
+// ===== SIGNALS =====
+const SIGNAL_DEFS = [
+  { id: 'weather', name: 'Weather', icon: '🌦', unit: '', desc: '' },
+  { id: 'crowd', name: 'Crowd Density', icon: '👥', unit: '%', desc: '' },
+  { id: 'lighting', name: 'Street Lighting', icon: '💡', unit: '%', desc: '' },
+  { id: 'incidents', name: 'Incidents (1hr)', icon: '⚠', unit: '', desc: '' },
+  { id: 'traffic', name: 'Traffic Level', icon: '🚗', unit: '%', desc: '' },
+  { id: 'cctv', name: 'CCTV Coverage', icon: '📷', unit: '%', desc: '' },
+];
+
+let signalStates = {
+  weather: { value: 'Moderate Rain', level: 'warn', trend: [40,38,45,42,50,48,55], raw: 50 },
+  crowd: { value: '62', level: 'good', trend: [55,60,65,62,58,64,62], raw: 62 },
+  lighting: { value: '41', level: 'warn', trend: [45,40,42,38,41,43,41], raw: 41 },
+  incidents: { value: '2 Active', level: 'warn', trend: [1,0,1,2,2,1,2], raw: 2 },
+  traffic: { value: '73', level: 'warn', trend: [68,70,72,75,73,71,73], raw: 73 },
+  cctv: { value: '84', level: 'good', trend: [80,82,84,83,85,84,84], raw: 84 },
+};
+
+function getBarColor(level) {
+  if (level === 'good') return 'var(--teal)';
+  if (level === 'warn') return 'var(--amber)';
+  return 'var(--red)';
+}
+
+function renderSignals() {
+  const grid = document.getElementById('signals-grid');
+  if (!grid) return;
+  grid.innerHTML = SIGNAL_DEFS.map(def => {
+    const s = signalStates[def.id];
+    const maxTrend = Math.max(...s.trend, 1);
+    const bars = s.trend.map(v => {
+      const h = Math.max(4, Math.round((v / maxTrend) * 36));
+      return `<div class="signal-bar" style="height:${h}px; background:${getBarColor(s.level)}"></div>`;
+    }).join('');
+    return `
+    <div class="signal-card" id="sig-${def.id}">
+      <div class="signal-header">
+        <div class="signal-name">${def.icon} ${def.name}</div>
+        <div class="signal-status status-${s.level}">${s.level === 'good' ? '↑ OK' : s.level === 'warn' ? '⚠ Watch' : '↓ Alert'}</div>
+      </div>
+      <div class="signal-value" id="sigv-${def.id}">${s.value}</div>
+      <div class="signal-sub">${def.unit ? def.unit + ' current' : 'simulated live'}</div>
+      <div class="signal-mini-chart" id="sigc-${def.id}">${bars}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateSignal(id) {
+  const s = signalStates[id];
+  if (!s) return;
+
+  if (id === 'weather') {
+    const weathers = ['Light Rain','Moderate Rain','Overcast','Drizzle','Clear'];
+    s.value = weathers[Math.floor(Math.random()*weathers.length)];
+    s.level = s.value === 'Clear' ? 'good' : 'warn';
+  } else if (id === 'incidents') {
+    const delta = Math.random() < 0.3 ? (Math.random() < 0.5 ? 1 : -1) : 0;
+    s.raw = Math.max(0, Math.min(8, s.raw + delta));
+    s.value = s.raw + ' Active';
+    s.level = s.raw === 0 ? 'good' : s.raw <= 2 ? 'warn' : 'bad';
+    s.trend.push(s.raw);
+    s.trend.shift();
+  } else {
+    const delta = Math.round((Math.random() - 0.5) * 8);
+    s.raw = Math.max(10, Math.min(99, s.raw + delta));
+    s.value = String(s.raw);
+    if (id === 'cctv' || id === 'crowd') {
+      s.level = s.raw >= 70 ? 'good' : s.raw >= 45 ? 'warn' : 'bad';
+    } else if (id === 'lighting') {
+      s.level = s.raw >= 65 ? 'good' : s.raw >= 40 ? 'warn' : 'bad';
+    } else {
+      s.level = s.raw <= 50 ? 'good' : s.raw <= 75 ? 'warn' : 'bad';
+    }
+    s.trend.push(s.raw);
+    s.trend.shift();
+  }
+
+  const el = document.getElementById(`sigv-${id}`);
+  const card = document.getElementById(`sig-${id}`);
+  if (el && card) {
+    el.textContent = s.value;
+    // Update status badge
+    const badge = card.querySelector('.signal-status');
+    if (badge) {
+      badge.className = `signal-status status-${s.level}`;
+      badge.textContent = s.level === 'good' ? '↑ OK' : s.level === 'warn' ? '⚠ Watch' : '↓ Alert';
+    }
+    card.classList.add('updating');
+    setTimeout(() => card.classList.remove('updating'), 1000);
+
+    const chartEl = document.getElementById(`sigc-${id}`);
+    if (chartEl) {
+      const maxTrend = Math.max(...s.trend, 1);
+      chartEl.innerHTML = s.trend.map(v => {
+        const h = Math.max(4, Math.round((v / maxTrend) * 36));
+        return `<div class="signal-bar" style="height:${h}px; background:${getBarColor(s.level)}"></div>`;
+      }).join('');
+    }
+  }
+}
+
+function startSignalUpdates() {
+  renderSignals();
+  let i = 0;
+  if (signalsInterval) clearInterval(signalsInterval);
+  signalsInterval = setInterval(() => {
+    const ids = Object.keys(signalStates);
+    updateSignal(ids[i % ids.length]);
+    i++;
+  }, 2200);
+}
+
+// ===== FACTORS =====
+const factors = [
+  { icon: '💡', name: 'Street Lighting Level', desc: 'illumination sensor + city map data', weight: 28 },
+  { icon: '📷', name: 'CCTV Coverage Density', desc: 'camera network coverage (%)', weight: 22 },
+  { icon: '👥', name: 'Pedestrian Footfall', desc: 'crowd density + time-of-day model', weight: 18 },
+  { icon: '⚠', name: 'Incident Reports', desc: 'police API + citizen reports (1hr)', weight: 16 },
+  { icon: '🌧', name: 'Weather Conditions', desc: 'rain/fog risk modifier', weight: 10 },
+  { icon: '🚗', name: 'Traffic Congestion', desc: 'spillover isolation risk', weight: 6 },
+];
+
+function renderFactors() {
+  const fl = document.getElementById('factor-list');
+  if (!fl) return;
+  fl.innerHTML = factors.map(f => `
+    <div class="factor-row">
+      <div class="factor-icon">${f.icon}</div>
+      <div class="factor-info">
+        <div class="factor-name">${f.name}</div>
+        <div class="factor-desc">${f.desc}</div>
+      </div>
+      <div class="factor-weight">
+        <div class="weight-val">${f.weight}%</div>
+        <div class="weight-bar-wrap">
+          <div class="weight-bar-track">
+            <div class="weight-bar-fill" style="width:${f.weight * 2.5}%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== EMERGENCY =====
+function shareTrip() {
+  const btn = document.getElementById('share-btn');
+  if (!btn) return;
+  btn.classList.add('active');
+  btn.textContent = '✓ Trip Shared';
+  const confirm = document.getElementById('share-confirm');
+  if (confirm) confirm.classList.add('show');
+  showToast('📡 Trip status shared to 2 contacts');
+}
+
+function callSOS() {
+  showToast('🚨 SOS alert sent to emergency contacts + nearby police');
+}
+
+function acceptReroute() {
+  showToast('✓ Rerouted via Indiranagar 100ft Rd — Stay safe!');
+}
+
+// ===== FADE IN OBSERVER =====
+function initFadeIns() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+}
+
+// ===== COUNTER ANIMATION =====
+// FIX: animateCounter now accepts a formatter function for "3.4K" style output
+function animateCounter(el, target, formatter) {
+  if (!el) return;
+  let current = 0;
+  const duration = 2000;
+  const step = target / (duration / 16);
+  const timer = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = formatter ? formatter(Math.round(current)) : Math.round(current);
+    if (current >= target) clearInterval(timer);
+  }, 16);
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  updateClock();
+  setInterval(updateClock, 1000);
+  startSignalUpdates();
+  renderFactors();
+  initFadeIns();
+
+  // FIX: stat2 animates to 3400 and formats as "3.4K"
+  setTimeout(() => {
+    animateCounter(document.getElementById('stat2'), 3400, n => {
+      return n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n);
+    });
+  }, 800);
+
+  // Auto-trigger demo with default values on load
+  setTimeout(() => {
+    analyzeRoutes();
+  }, 600);
+});
+
+// Redraw map on resize
+window.addEventListener('resize', () => {
+  if (routesData.length) renderMap(routesData);
+});
+</script>
+</body>
+</html>
