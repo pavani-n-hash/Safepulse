@@ -239,9 +239,6 @@ Add these before submission:
 
 - AI explanation screenshot : ![alt text](image-3.png)
 
-- Demo video link : <video controls src="20260415-0652-43.5187930.mp4" title="Demo video"></video>
-
-
 
 ---
 
