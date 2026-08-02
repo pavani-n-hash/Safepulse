@@ -21,7 +21,7 @@ Instead of building a full mobility platform, SafePulse delivers a practical mic
 - Compare route options
 - Understand risk instantly
 - Get an AI-generated recommendation
-- Act within seconds
+- Act within seconds 
 
 ---
 
@@ -57,7 +57,7 @@ Instead of building a full mobility platform, SafePulse delivers a practical mic
 
 ---
 
-## How It Works
+### How It Works
 
 SafePulse simulates urban mobility intelligence by combining multiple signals into a route-level safety evaluation.
 
@@ -85,7 +85,7 @@ Example reasoning:
 
 ---
 
-## Demo Flow
+### Demo Flow
 
 A judge or user can understand the product in under a minute:
 
@@ -99,7 +99,7 @@ A judge or user can understand the product in under a minute:
 
 ---
 
-## Tech Stack
+### Tech Stack
 
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Node.js, Express
@@ -108,7 +108,7 @@ A judge or user can understand the product in under a minute:
 
 ---
 
-## Project Structure
+### Project Structure
 
 ```bash
 Safepulse/
@@ -122,7 +122,7 @@ Safepulse/
 
 ---
 
-## Run Locally
+### Run Locally
 
 ### 1. Clone the repository
 ```bash
@@ -147,7 +147,7 @@ http://localhost:3000
 
 ---
 
-## Example Use Case
+### Example Use Case
 
 Imagine a commuter returning home at night.
 
