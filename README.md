@@ -13,9 +13,9 @@ Instead of relying only on ETA, SafePulse uses real-time or simulated urban sign
 Urban travel decisions are often made with incomplete information.  
 A route may be fast but poorly lit, isolated, recently reported unsafe, or less active at night.
 
-SafePulse addresses one focused problem:
+SafePulse addresses one focused problem: 
 
-**“How can a commuter quickly decide which route is safest right now?”**
+** “How can a commuter quickly decide which route is safest right now?”**
 
 Instead of building a full mobility platform, SafePulse delivers a practical micro-solution:
 - Compare route options
@@ -165,7 +165,7 @@ So instead, it recommends another route that is:
 
 This makes SafePulse not just a navigation idea, but a **decision intelligence tool** for safer movement in cities.
 
----
+----
 
 ## Why This Is Feasible
 
