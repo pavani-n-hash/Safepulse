@@ -1,5 +1,5 @@
-# SafePulse
-### AI-Powered Safer Route Intelligence for Urban Commuters
+# SafePulse  
+### AI-Powered Safer Route Intelligence for Urban Commuters 
 
 SafePulse helps urban commuters choose the **safest route, not just the fastest one**.  
 Instead of relying only on ETA, SafePulse uses real-time or simulated urban signals like crowd density, lighting, incidents, traffic, and weather to generate a **Safety Score** and recommend the most reliable route within seconds.
@@ -216,7 +216,7 @@ Potential beneficiaries:
 
 ---
 
-## Future Scope
+## Future Scope 
 
 - Real-time API integrations
 - Personalized commuter profiles
@@ -259,7 +259,7 @@ SafePulse is designed to match hackathon judging expectations:
 
 **Team Name:** SafePulse  
 **Project:** Smart Mobility Intelligence System  
-**Built by:** Pavani
+**Built by:** Pavani 
 
 
 ---
